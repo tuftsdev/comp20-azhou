@@ -1,12 +1,62 @@
-@media screen and (max-device-width: 400px){
-    .software{
-	width:128px;
-	height:240px;
-	background:url(software.png) 512 -240px;
+div.software{
+    width:128px;
+    height:240px;
+    background-image: url("software.png");
+}
+
+@media screen and (max-width: 400px){
+    div.software{
+    background-position: 128px -240px;
     }
 }
-.software{
-    width: 128px;
+@media screen and (min-width: 401){
+    div.software{
+	   width:128px;
     height:240px;
-    background: url(software.png) 512 -240px;
+    background-image: url("software.png");
+	background-position: 111px 111px;
+    }
+}
+@media screen and (min-width: 501){
+    div.software{
+	   width:128px;
+    height:240px;
+    background-image: url("software.png");
+	background-position: 324px -240px;
+    }
+}
+@media screen and (min-width: 601){
+    div.software{
+	background-position: 128px -240px;
+    }
+}
+@media screen and (min-width: 701){
+    div.software{
+	background-position: 128px -240px;
+    }
+}
+@media screen and (min-width: 801){
+    div.software{
+	background-position: 128px -240px;
+    }
+}
+@media screen and (min-width: 901){
+    div.software{
+	background-position: 128px -240px;
+    }
+}
+@media screen and (min-width: 1001){
+    div.software{
+	background-position: 128px -240px;
+    }
+}
+@media screen and (min-width: 1101){
+    div.software{
+	background-position: 128px -240px;
+    }
+}
+@media screen and (min-width: 1201){
+    div.software{
+	background-position: 128px -240px;
+    }
 }
