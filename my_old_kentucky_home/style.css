@@ -1,0 +1,14 @@
+#music_video{
+	margin: 0 auto;
+	width: 450px;
+	display: block;
+}
+body{
+	background-color: #B4CDCD;
+	color: #2F4F4F;
+	text-align: center;
+	font-family: "Arial Black", Gadget, sans-serif;
+}
+img{
+	width: 150px;
+}
