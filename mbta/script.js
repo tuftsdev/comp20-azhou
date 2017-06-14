@@ -26,11 +26,32 @@ function addDataToMarkers(){
     for(var j = 0; j < mbtadata.TripList.Trips[i].Predictions.length; j++){
       var stninfo = markerDictionary[mbtadata.TripList.Trips[i].Predictions[j].Stop];
       var currentcontent = stninfo.infowindow.content;
-      currentcontent = currentcontent + "<p>There is a train going to " + 
-      mbtadata.TripList.Trips[i].Destination + " arriving in " + 
-      mbtadata.TripList.Trips[i].Predictions[j].Seconds + " seconds</p>"; 
-      stninfo.infowindow.setContent(currentcontent);
+      var addedcontent = "<tr><td>" + mbtadata.TripList.Trips[i].Destination + "</td><td>";
+      var time = secondsToMinutes(mbtadata.TripList.Trips[i].Predictions[j].Seconds);
+      if(time < 1)
+        addedcontent += "Now Arriving";
+      else
+        addedcontent += time + " minutes";
+      addedcontent += "</td></tr>"; 
+      addedcontent = insertString(currentcontent, addedcontent, "</table>");
+      stninfo.infowindow.setContent(addedcontent);
     }
+    addTrainMarkers(map, i);
+  }
+}
+function addTrainMarkers(map, i){
+  if(mbtadata.TripList.Trips[i].Position){
+    newtrain = {lat: mbtadata.TripList.Trips[i].Position.Lat, lng: mbtadata.TripList.Trips[i].Position.Long};
+    var marker = new google.maps.Marker({
+      position: newtrain,
+      map: map,
+      title: "train",
+      icon: {
+        size: new google.maps.Size(20, 20),
+        scaledSize: new google.maps.Size(20, 20),
+        url: "train.png"
+      }
+    });
   }
 }
 function initMap() {
@@ -96,8 +117,9 @@ function addSubMarker(map, lat, lng, name){
         url: "t.png"
       }
     });
+    var tablehtml = "<h3>" + name + "</h3><p></p><table><tr><th>Destination</th><th>Arrival Time</th></tr></table>";
     var infowindow = new google.maps.InfoWindow({
-      content: name
+      content: tablehtml
     });
     markerDictionary[name] = {marker, infowindow};
     marker.addListener('click', function(){
@@ -127,7 +149,7 @@ function addStartMarker(map, lat, lng){
       strokeOpacity: 0.5,
       strokeWeight: 3,
       map: map
-  });
+    });
   })
 }
 function calculatedistance(){
@@ -146,10 +168,13 @@ function calculatedistance(){
 function getMiles(i){
   return (i*0.000621371192).toFixed(2);
 }
-
-
-
-
+function secondsToMinutes(i){
+  return Math.floor(i / 60);
+}
+function insertString(a, b, at){
+  var position = a.indexOf(at);
+  return a.substr(0, position) + b + a.substr(position);
+}
 
 
 
