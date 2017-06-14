@@ -1,12 +1,36 @@
 function getMyLoc(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(position){
+//      me = {lat: 42.305093, lng: -71.061667};
       me = {lat: position.coords.latitude, lng: position.coords.longitude};
       initMap();
+      loadJsonData();
     });
   }
-  else{
+  else
     alert("Geolocation not supported by your web browser.");
+}
+function loadJsonData(){
+  request = new XMLHttpRequest();
+  request.open("GET", "https://defense-in-derpth.herokuapp.com/redline.json", true);
+  request.onreadystatechange = function(){
+    if(request.readyState == 4 && request.status == 200){
+      mbtadata = JSON.parse(request.responseText);
+      addDataToMarkers();
+    }
+  }
+  request.send();
+}
+function addDataToMarkers(){
+  for(var i = 0; i < mbtadata.TripList.Trips.length; i++){
+    for(var j = 0; j < mbtadata.TripList.Trips[i].Predictions.length; j++){
+      var stninfo = markerDictionary[mbtadata.TripList.Trips[i].Predictions[j].Stop];
+      var currentcontent = stninfo.infowindow.content;
+      currentcontent = currentcontent + "<p>There is a train going to " + 
+      mbtadata.TripList.Trips[i].Destination + " arriving in " + 
+      mbtadata.TripList.Trips[i].Predictions[j].Seconds + " seconds</p>"; 
+      stninfo.infowindow.setContent(currentcontent);
+    }
   }
 }
 function initMap() {
@@ -14,22 +38,22 @@ function initMap() {
     zoom: 11,
     center: me
   });
-
-  allsubMarkers = [];
+  numMarkers = 0;
+  markerDictionary = {};
   drawRedLine(map);
   addStartMarker(map, me.lat, me.lng);
 }
 function drawRedLine(map){
   drawLine(map, 42.395428, -71.142483, 42.39674, -71.121815, "Alewife");
   drawLine(map, 42.39674, -71.121815, 42.3884, -71.11914899999999, "Davis");
-  drawLine(map, 42.3884, -71.11914899999999, 42.373362, -71.118956, "Porter");
-  drawLine(map, 42.373362, -71.118956, 42.365486, -71.103802, "Harvard");
-  drawLine(map, 42.365486, -71.103802, 42.36249079, -71.08617653, "Central");
-  drawLine(map, 42.36249079, -71.08617653, 42.361166, -71.070628, "Kendall");
-  drawLine(map, 42.361166, -71.070628, 42.35639457, -71.0624242, "Charles");
-  drawLine(map, 42.35639457, -71.0624242, 42.355518, -71.060225, "Park");
-  drawLine(map, 42.355518, -71.060225, 42.352271, -71.05524200000001, "Downtown");
-  drawLine(map, 42.352271, -71.05524200000001, 42.342622, -71.056967, "South");
+  drawLine(map, 42.3884, -71.11914899999999, 42.373362, -71.118956, "Porter Square");
+  drawLine(map, 42.373362, -71.118956, 42.365486, -71.103802, "Harvard Square");
+  drawLine(map, 42.365486, -71.103802, 42.36249079, -71.08617653, "Central Square");
+  drawLine(map, 42.36249079, -71.08617653, 42.361166, -71.070628, "Kendall/MIT");
+  drawLine(map, 42.361166, -71.070628, 42.35639457, -71.0624242, "Charles/MGH");
+  drawLine(map, 42.35639457, -71.0624242, 42.355518, -71.060225, "Park Street");
+  drawLine(map, 42.355518, -71.060225, 42.352271, -71.05524200000001, "Downtown Crossing");
+  drawLine(map, 42.352271, -71.05524200000001, 42.342622, -71.056967, "South Station");
   drawLine(map, 42.342622, -71.056967, 42.330154, -71.057655, "Broadway");
   drawLine(map, 42.330154, -71.057655, 42.320685, -71.052391, "Andrew");
   //split at JFK
@@ -62,7 +86,7 @@ function drawLine(map, lat1, lng1, lat2, lng2, name){
 function addSubMarker(map, lat, lng, name){
   if(name){
     newmarker = {lat, lng};
-    marker = new google.maps.Marker({
+    var marker = new google.maps.Marker({
       position: newmarker,
       map: map,
       title: name,
@@ -72,7 +96,13 @@ function addSubMarker(map, lat, lng, name){
         url: "t.png"
       }
     });
-    allsubMarkers.push({marker, name}); 
+    var infowindow = new google.maps.InfoWindow({
+      content: name
+    });
+    markerDictionary[name] = {marker, infowindow};
+    marker.addListener('click', function(){
+      infowindow.open(map, marker);
+    });
   }
 }
 function addStartMarker(map, lat, lng){
@@ -91,7 +121,7 @@ function addStartMarker(map, lat, lng){
     polyline = new google.maps.Polyline({
       path:[
         new google.maps.LatLng(me.lat, me.lng),
-        allsubMarkers[closestStnIdx].marker.position
+        markerDictionary[closestStn].marker.position
       ],
       strokeColor: "#0000FF",
       strokeOpacity: 0.5,
@@ -102,20 +132,16 @@ function addStartMarker(map, lat, lng){
 }
 function calculatedistance(){
   shortestdist = Infinity;
-  for(i = 0; i < allsubMarkers.length; i++){
+  for(stn in markerDictionary){
     dist = google.maps.geometry.spherical.computeDistanceBetween(
-      allsubMarkers[i].marker.position,
+      markerDictionary[stn].marker.position,
       new google.maps.LatLng(me.lat, me.lng));
-    console.log(allsubMarkers[i].name);
     if(dist < shortestdist){
-      closestStnIdx = i;
-      closestStn = allsubMarkers[i].name;
+      closestStn = stn;
       shortestdist = dist;
     }
   }
   shortestdist = getMiles(shortestdist);
-  console.log(shortestdist);
-  console.log(closestStn);
 }
 function getMiles(i){
   return (i*0.000621371192).toFixed(2);
