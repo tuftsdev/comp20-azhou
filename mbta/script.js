@@ -1,7 +1,6 @@
 function getMyLoc(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(position){
-//      me = {lat: 42.305093, lng: -71.061667};
       me = {lat: position.coords.latitude, lng: position.coords.longitude};
       initMap();
       loadJsonData();
@@ -52,6 +51,24 @@ function addTrainMarkers(map, i){
         url: "train.png"
       }
     });
+    var arrivingstation = mbtadata.TripList.Trips[i].Predictions[0].Stop;
+    var traintime = mbtadata.TripList.Trips[i].Predictions[0].Seconds;
+    var traininfo = "<h3>Train " + mbtadata.TripList.Trips[i].Position.Train + "</h3>";
+    if(traintime < 0){
+        traininfo += "<p>Currently at " + arrivingstation +"</p>";
+    }
+    else{
+      traininfo += "<p>Arriving at " + arrivingstation + " in " + traintime + " seconds </p>";
+    }
+    var infowindow = new google.maps.InfoWindow({
+      content: traininfo
+    });
+    marker.addListener('mouseover', function(){
+      if(curropenwindow)
+        curropenwindow.close();
+      curropenwindow = infowindow;
+      infowindow.open(map, marker);
+    });
   }
 }
 function initMap() {
@@ -61,6 +78,7 @@ function initMap() {
   });
   numMarkers = 0;
   markerDictionary = {};
+  curropenwindow = false;
   drawRedLine(map);
   addStartMarker(map, me.lat, me.lng);
 }
@@ -123,6 +141,9 @@ function addSubMarker(map, lat, lng, name){
     });
     markerDictionary[name] = {marker, infowindow};
     marker.addListener('click', function(){
+      if(curropenwindow)
+        curropenwindow.close();
+      curropenwindow = infowindow;
       infowindow.open(map, marker);
     });
   }
@@ -139,6 +160,9 @@ function addStartMarker(map, lat, lng){
     " which is " + shortestdist + " miles away"
   });
   marker.addListener('click', function(){
+    if(curropenwindow)
+      curropenwindow.close();
+    curropenwindow = infowindow;
     infowindow.open(map, marker);
     polyline = new google.maps.Polyline({
       path:[
