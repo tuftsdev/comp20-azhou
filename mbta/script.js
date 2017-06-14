@@ -1,11 +1,23 @@
-
+function getMyLoc(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(position){
+      me = {lat: position.coords.latitude, lng: position.coords.longitude};
+      initMap();
+    });
+  }
+  else{
+    alert("Geolocation not supported by your web browser.");
+  }
+}
 function initMap() {
-  southstn = {lat: 42.352271, lng: -71.05524200000001};
   map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 15,
-    center: southstn
+    zoom: 11,
+    center: me
   });
+  addStartMarker(map, me.lat, me.lng);
+  allsubMarkers = [];
   drawRedLine(map);
+  calculatedistance();
 }
 function drawRedLine(map){
   drawLine(map, 42.395428, -71.142483, 42.39674, -71.121815);
@@ -26,28 +38,28 @@ function drawRedLine(map){
   drawLine(map, 42.2665139, -71.0203369, 42.251809, -71.005409);
   drawLine(map, 42.251809, -71.005409, 42.233391, -71.007153);
   drawLine(map, 42.233391, -71.007153, 42.2078543, -71.0011385);
-  addMarker(map, 42.2078543, -71.0011385);
+  addSubMarker(map, 42.2078543, -71.0011385);
   //back to JFK split
   drawLine(map, 42.320685, -71.052391, 42.31129, -71.053331);
   drawLine(map, 42.31129, -71.053331, 42.300093, -71.061667);
   drawLine(map, 42.300093, -71.061667, 42.29312583, -71.06573796000001);
   drawLine(map, 42.29312583, -71.06573796000001, 42.284652, -71.06448899999999);
-  addMarker(map, 42.284652, -71.06448899999999);
+  addSubMarker(map, 42.284652, -71.06448899999999);
 }
 function drawLine(map, lat1, lng1, lat2, lng2){
-  addMarker(map, lat1, lng1);
+  addSubMarker(map, lat1, lng1);
   polyline = new google.maps.Polyline({
     path:[
       new google.maps.LatLng(lat1, lng1),
       new google.maps.LatLng(lat2, lng2)
     ],
     strokeColor: "#FF0000",
-    strokeOpacity: 1.0,
-    strokeWeight: 5,
+    strokeOpacity: 0.5,
+    strokeWeight: 3,
     map: map
   });
 }
-function addMarker(map, lat, lng){
+function addSubMarker(map, lat, lng){
   newmarker = {lat, lng};
   marker = new google.maps.Marker({
     position: newmarker,
@@ -58,4 +70,37 @@ function addMarker(map, lat, lng){
       url: "t.png"
     }
   });
+  allsubMarkers.push(marker);
 }
+function addStartMarker(map, lat, lng){
+  newmarker = {lat, lng};
+  marker = new google.maps.Marker({
+    position: newmarker,
+    map: map
+  })
+}
+function calculatedistance(){
+  shortestdist = Infinity;
+  for(i = 0; i < allsubMarkers.length; i++){
+    dist = google.maps.geometry.spherical.computeDistanceBetween(
+      allsubMarkers[i].position,
+      new google.maps.LatLng(me.lat, me.lng));
+    console.log(dist);
+    if(dist < shortestdist){
+      shortestdist = dist;
+    }
+  }
+  shortestdist = getMiles(shortestdist);
+  console.log(shortestdist);
+}
+
+function getMiles(i){
+  return i*0.000621371192;
+}
+
+
+
+
+
+
+
