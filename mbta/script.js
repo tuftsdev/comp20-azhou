@@ -2,16 +2,32 @@ function getMyLoc(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(position){
       me = {lat: position.coords.latitude, lng: position.coords.longitude};
+      postData(me.lat, me.lng);
       initMap();
       loadJsonData();
-    });
+    }, function(error){
+      alert('error occurred. error message: ' + error.message);
+    }, {timeout: 10000});
   }
   else
     alert("Geolocation not supported by your web browser.");
 }
+function postData(lat, lng){
+  var postreq = new XMLHttpRequest();
+  postreq.open('POST', 'https://calm-meadow-89090.herokuapp.com/userloc', true);
+  postreq.setRequestHeader("Content-type", "application/json");
+  postreq.onreadystatechange = function(){
+    if(postreq.readyState == 4 && postreq.status == 200){
+      console.log(postreq.responseText);
+    }
+  }
+  var sendme = {"lat": lat, "lng": lng};
+  sendme = JSON.stringify(sendme);
+  postreq.send(sendme);
+}
 function loadJsonData(){
   request = new XMLHttpRequest();
-  request.open("GET", "https://defense-in-derpth.herokuapp.com/redline.json", true);
+  request.open("GET", "https://calm-meadow-89090.herokuapp.com/redline.json", true);
   request.onreadystatechange = function(){
     if(request.readyState == 4 && request.status == 200){
       mbtadata = JSON.parse(request.responseText);
