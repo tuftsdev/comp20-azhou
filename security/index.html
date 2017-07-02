@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Security Analysis</title>
+        <link href = "style.css" rel = "stylesheet" type = "text/css">
+    </head>
+    <body>
+        <h1>Security Assesment</h1>
+        <p>Prepared by Allen Zhou 7/3/17</p>
+        <h2>Introduction</h2>
+        <p>This assessment tests the security of a simple node.js server built from an express framework and a mongodb database for COMP 20, lab 13. The web application allows clients to make POST requests to /sendLocation with their latitude, longitude, and login name. Accessing the root / shows all the POST request checkins made. Making a GET request to /checkins.json with the user's login name as a query provides all of that user's checkins. Many glaring vulnerabilities exist in the given server code, which makes it susceptible to cross site scripting (XSS) and noSQL database injections. This document will identify specific instances of these vulnerabilities and then provide solutions.</p>
+        <h2>Methodology</h2>
+        <p>In order to test the security flaws in the given server code, I first reviewed the code, paying attention to where clients could submit data to the server. I then downloaded the code and ran it on a localhost, and began to simulate attacks on the server using curl on the command line to create malicious POST and GET requests. After inflicting damage onto the server through these attacks, I reviewed the code and ways in which security could be improved.</p>
+        <h2>Abstract of Findings</h2>
+        <p>This web application is incredibly susceptible due to the false assumption that client input will always be properly formatted.</p>
+        <h2>Issues Found</h2>
+        <ol>
+            <li>
+               <h4>Cross Site Scripting</h4>
+               <ul>
+                    <li>POST Request for /sendLocation</li>
+                    <li><span class="red">Issue Severity: HIGH</span> This security flaw allows attackers to deliver malicious content to other users within the context of their session, ranging from issues as mild as displaying arbitrary HTML code on another user's session, to hijacking the browser, forcing it to crash, or even stealing sensitive user data through javascript code. As a result, this cross site scripting vulnerability is labelled as a <span class="red">HIGH</span> priority security issue</li>
+                    <li>The issue described above is created when the user's input for the login variable is not sanitized or ensured that it is a valid and non-malicious string. As a result, an attacker can insert some HTML or Javascript code that would in turn be reflected upon all future users who access the web application. Shown below is a normal use of the POST request at /sendLocation, and then the result of a simple attack created by running the following curl command in the command prompt.</li>
+                    <img class="code" src="images/curlxsspost.png" alt="curl xss post command">
+                    <img class="screenshots" src="images/xssnormal.png" alt="no xss attack">
+                    <img class="screenshots" src="images/xsshacked.png" alt="xss attacked">
+                    <li>More text here</li>
+
+                </ul>
+            </li>
+        </ol>
+        <h2>Conclusion</h2>
+
+
+    </body>
+</html>

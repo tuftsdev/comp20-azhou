@@ -1,0 +1,14 @@
+.red {
+	color: red;
+}
+img {
+	border: 1px solid #021a40;
+}
+.screenshots, .code{
+	border:;
+	width: 600px;
+	height: auto;
+}
+.code{
+	width:1000px;
+}
