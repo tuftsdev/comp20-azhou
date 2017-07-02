@@ -20,12 +20,19 @@
                <ul>
                     <li>POST Request for /sendLocation</li>
                     <li><span class="red">Issue Severity: HIGH</span> This security flaw allows attackers to deliver malicious content to other users within the context of their session, ranging from issues as mild as displaying arbitrary HTML code on another user's session, to hijacking the browser, forcing it to crash, or even stealing sensitive user data through javascript code. As a result, this cross site scripting vulnerability is labelled as a <span class="red">HIGH</span> priority security issue</li>
-                    <li>The issue described above is created when the user's input for the login variable is not sanitized or ensured that it is a valid and non-malicious string. As a result, an attacker can insert some HTML or Javascript code that would in turn be reflected upon all future users who access the web application. Shown below is a normal use of the POST request at /sendLocation, and then the result of a simple attack created by running the following curl command in the command prompt.</li>
+                    <li>Shown below are the lines of offending code</li>
+                    <img class="code" src="images/xsscode.png" alt="vulnerable code shown">
+                    <li>The issue described above is created when the user's input for the login variable is not sanitized or ensured that it is a valid and non-malicious string. Instead, it is directly inserted into the database, regardless of what it is. As a result, an attacker can insert some HTML or Javascript code that would in turn be reflected upon all future users who access the web application. Shown below is a normal use of the POST request at /sendLocation, and then the result of a simple attack created by running the following curl command in the command prompt.</li>
                     <img class="code" src="images/curlxsspost.png" alt="curl xss post command">
                     <img class="screenshots" src="images/xssnormal.png" alt="no xss attack">
                     <img class="screenshots" src="images/xsshacked.png" alt="xss attacked">
-                    <li>More text here</li>
-
+                    <li>In order to patch this security flaw, the user input for the login field must be sanitized. This can be done in a number of ways, most simply using a library like <a href="https://github.com/chriso/validator.js">validator.js</a> to automatically sanitize the user string input by calling the function: escape(input)</li>
+                </ul>
+            </li>
+            <li>
+                <h4>Database Injections</h4>
+                <ul>
+                    <li>GET Request for /checkins.json</li>
                 </ul>
             </li>
         </ol>
