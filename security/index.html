@@ -12,7 +12,7 @@
         <h2>Methodology</h2>
         <p>In order to test the security flaws in the given server code, I first reviewed the code, paying attention to where clients could submit data to the server. I then downloaded the code and ran it on a localhost, and began to simulate attacks on the server using curl on the command line to create malicious POST and GET requests. After inflicting damage onto the server through these attacks, I reviewed the code and ways in which security could be improved.</p>
         <h2>Abstract of Findings</h2>
-        <p>This web application is incredibly susceptible due to the false assumption that client input will always be properly formatted.</p>
+        <p>This web application is incredibly susceptible due to the false assumption that client input will always be properly formatted and regulated. Mistakes in server side security in the given code can allow attackers to deliver malicious content to other users, spam the database with useless data, and perform database injections, allowing attackers to see possibly sensitive data. In its current state, this web application is not fit for use by clients.</p>
         <h2>Issues Found</h2>
         <ol>
             <li>
@@ -26,18 +26,34 @@
                     <img class="code" src="images/curlxsspost.png" alt="curl xss post command">
                     <img class="screenshots" src="images/xssnormal.png" alt="no xss attack">
                     <img class="screenshots" src="images/xsshacked.png" alt="xss attacked">
-                    <li>In order to patch this security flaw, the user input for the login field must be sanitized. This can be done in a number of ways, most simply using a library like <a href="https://github.com/chriso/validator.js">validator.js</a> to automatically sanitize the user string input by calling the function: escape(input)</li>
+                    <li>In order to patch this security flaw, the user input for the login field must be sanitized. This can be done in a number of ways, most simply by using a library like <a href="https://github.com/chriso/validator.js">validator.js</a> to automatically sanitize the user string input by calling a function like escape()</li>
                 </ul>
             </li>
             <li>
-                <h4>Database Injections</h4>
+                <h4>Database Spamming</h4>
+                <ul>
+                    <li>POST Request for /sendLocation</li>
+                    <li><span class ="orange">Issue Severity: MED</span> This security flaw allows attackers to abuse the unregulated POST request feature at /sendLocation. At it's worst, the database will be filled up with spam and meaningless content, eventually causing the server's space to be completely used up. Since this cannot affect clients and cannot spread malware the way cross site scripting does, this issue has been labelled as a <span class="orange">MED</span> priority security issue. However, it is still a huge security flaw, as it can result in server space being rendered useless, and will likely cause the site to also become useless once no more POST requests created by actual clients can be saved in the database.</li>
+                    <li>Since the server does not filter POST requests, it is easy for attackers to spam the database by repeatedly calling curl commands through a simple bash script, like the one shown below. Running this script will cause endless POST requests to /sendLocation, resulting in a page similar to the one seen below. As seen here, running such a script can result in up to 5 POST requests per second to the server.</li>
+                    <img class="code" src="images/postspamcode.png" alt="bash script to spam POST">
+                    <img class="screenshots" src="images/postspam.png" alt="spammed database page">
+                    <li>In order to patch this security flaw, some form of POST request filter must be applied before a request is inserted into the database. This could look like a filter in which any IP address can only make a certain number of POST requests per minute, or limiting the IP addresses able to send POST requests at all to only trusted sources.</li>
+                </ul>
+            </li>
+            <li>
+                <h4>NoSQL Database Injections</h4>
                 <ul>
                     <li>GET Request for /checkins.json</li>
+                    <li><span class ="orange">Issue Severity: MED</span> This security flaw allows attackers to use the GET request function at /checkins.json to perform NoSQL database injections. This can allow attackers to view not only their own checkins, but all the checkins. Were the database to hold more sensitive information, like passwords or credit card info, this security flaw would be a much larger issue. But since the GET request for the home page of the site already provides all the checkins, this has been labelled as a <span class="orange">MED</span> priority security issue. Nontheless, the security flaw should be patched in case features are to be added to the site that would allow secure logins, with usernames and passwords.</li>
+                    <li>Shown below are the offending lines of code</li>
+                    <img class="code" src="images/nosqlcode.png" alt="vulnerable code to nosql">
+                    <li>The issue is created when the login query is not sanitized. It is directly set equal to the variable loginEntry, which in turn is directly searched for through the database. As a result, an attacker can pass in queries with MongoDB operators to bypass needing specific login to access specific checkins. As a result typing something like the following into a browser's URI bar can result in all checkins being displayed, rather than just one specific login.</li>
+                    <img class="screenshots" src="images/nosqlbar.png" alt="URI bar for nosql injection">
+                    <li>To fix this, the login query must be sanitized. Once again, this can be achieved by including a library like <a href="https://github.com/chriso/validator.js">validator.js</a> that can sanitize user input using its escape() function.</li>
                 </ul>
             </li>
         </ol>
         <h2>Conclusion</h2>
-
-
+            <p>Although there are several security flaws in this site, they are all relatively easy and cheap to fix. Leaving the site as is, however, is a huge security issue, both to the server and to clients. In order to repair the site of its security flaws, it would cost about $100.</p>
     </body>
 </html>
